@@ -6,8 +6,10 @@ services:
     container_name: todo-container
     ports:
       - "8000:4000"
+    env_file:
+      - .env
     environment:
-      - mongoDbUrl=mongodb+srv://maged:lCy5H6siNX0NSBhE@learningcluster.k9rxsjb.mongodb.net/Fortstak-Task
+      - mongoDbUrl=${mongoDbUrl}
     restart: always
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q" ,"http://localhost:4000"]
