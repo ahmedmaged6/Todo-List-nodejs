@@ -1,109 +1,84 @@
+# Todo List Node.js Application - Internship Assessment
 
-## Documentation
+## Project Overview
+This project showcases an automated deployment of a Todo List Node.js application, involving dockerization, a GitHub Actions CI pipeline, Linux VM configuration with Ansible, and Docker Compose deployment with auto-updates using watchtower.
 
-[Documentation](https://linktodocumentation)
+## Part 1: Dockerization and CI Pipeline
 
-📝 To-Do List nodeJs
+### Objective
+Dockerize the Todo List Node.js application and automate image building and pushing to a private Docker registry using GitHub Actions.
 
-The to-do list application is a web-based application that allows users to create and manage a list of tasks. The user interface consists of a form to add new tasks, a list of all tasks, and controls to mark tasks as complete or delete them.
+### Accomplishments
+- Configured the application with a personal MongoDB database via a `.env` file.
+- Created a [Dockerfile](https://github.com/ahmedmaged6/Todo-List-nodejs/blob/master/Dockerfile):
+  - Used `node:lts-alpine3.22` for a lightweight container.
+  - Optimized dependency installation with `package*.json` caching.
+  - Exposed port 4000 and set `npm start` as the entrypoint.
+- Tested the Docker image locally at `http://localhost:4000`.
+- Developed a [GitHub Actions workflow](https://github.com/ahmedmaged6/Todo-List-nodejs/blob/master/.github/workflows/docker-image.yml) (`docker-image.yml`):
+  - Triggered on `master` branch pushes and pull requests.
+  - Authenticated with Docker Hub using secrets.
+  - Built and pushed images to `ahmedmaged6/fortstak` with `build-${{ github.run_number }}` and `latest` tags.
+- Verified successful CI pipeline runs in GitHub Actions.
 
-To create the application, Node.js is used to set up the server and handle the logic of the application. Express.js is used to create the routes for the application, allowing the user to interact with the application through a web browser. EJS is used to create the views for the application, allowing the user to see the list of tasks and the form to add new tasks. CSS is used to style the application, making it visually appealing and easy to use.
+### Screenshots
+- **Local Application**:  
+  ![Local Application](screenshots/local-app.png)  
+  *Description*: Application running in a Docker container on `http://localhost:4000`.
+- **CI Pipeline**:  
+  ![CI Pipeline](screenshots/ci-pipeline.png)  
+  *Description*: Successful GitHub Actions workflow run for image build and push.
+- **Docker Registry**:  
+  ![Docker Registry](screenshots/docker-registry.png)  
+  *Description*: Docker Hub repository `ahmedmaged6/fortstak` showing pushed images with `build-<number>` and `latest` tags.
 
-MongoDB and Mongoose are used to store the tasks in a database, allowing the user to add, delete, and update tasks as needed. Nodemon is used to monitor changes to the code and automatically restart the server, making it easy to develop and test the application.
+## Part 2: Linux VM Configuration with Ansible
 
-When the user adds a new task using the form, Node.js and Express.js handle the request and store the task in the database using Mongoose. When the user views the list of tasks, EJS displays the tasks from the database in a list on the web page. When the user marks a task as complete or deletes a task, Node.js and Express.js handle the request and update the database using Mongoose.
+### Objective
+Set up a Linux VM using KVM and configure it with Ansible to install Docker.
 
-Overall, the todo list application using Node.js, Express.js, EJS, CSS, JavaScript, MongoDB, Mongoose, and Nodemon can be a great way to create a functional and interactive web application that allows users to manage their tasks online. With the right combination of technologies, it is possible to create an application that is both functional and aesthetically pleasing, making it easy for users to manage their tasks in a convenient and efficient way.
+### Accomplishments
+- Created an Ubuntu VM using KVM with SSH access at IP `<vm-ip>`.
+- Prepared the VM for Ansible:
+  - Enabled SSH service and set up passwordless SSH with a key for the `ansible` user.
+  - Configured passwordless sudo for the `ansible` user.
+  - Installed Python3 for Ansible compatibility.
+- Defined the VM in an Ansible [inventory file](https://github.com/ahmedmaged6/Todo-List-nodejs/blob/master/ansible/inventory.ini) (`inventory.ini`) for remote management.
+- Developed an Ansible [playbook](https://github.com/ahmedmaged6/Todo-List-nodejs/blob/master/ansible/playbook.yml) (`playbook.yml`):
+  - Installed Docker and prerequisites (e.g., `docker-ce`, `containerd.io`).
+  - Added the `ansible` user to the Docker group.
+  - Created `/opt/app` and copied `docker-compose.yml` and `.env` files.
+  - Configured Docker Hub credentials and ran `docker compose up -d`.
+- Verified Docker installation and application deployment on the VM.
 
-Technologies Used: NodeJS, ExpressJS, EJS, CSS, JavaScript, Nodemon, MongoDB, Mongoose.
-## Demo
+### Screenshots
+- **Ansible Playbook Execution**:  
+  ![Ansible Playbook](screenshots/ansible-playbook.png)  
+  *Description*: Successful Ansible playbook execution from the local machine.
+- **Docker on VM**:  
+  ![Docker on VM](screenshots/docker-vm.png)  
+  *Description*: Docker installation verified on the VM.
 
-Under process...
-## Authors
+## Part 3: Docker Compose Deployment and Auto-Update
 
-- [@AnkitVishwakarma](https://github.com/Ankit6098)
+### Objective
+Deploy the application on the VM using Docker Compose with health checks and implement an auto-update mechanism for the Docker image.
 
+### Accomplishments
+- Developed a [Docker Compose file](https://github.com/ahmedmaged6/Todo-List-nodejs/blob/master/docker-compose.yml) (`docker-compose.yml`):
+  - Configured the `todo-app` service using `ahmedmaged6/fortstak:latest`, mapping port `8000:4000`.
+  - Loaded MongoDB credentials from `.env` and set a restart policy of `always`.
+  - Implemented a health check using `wget --spider` to verify application availability at `http://localhost:4000`.
+  - Added a `watchtower` service to monitor and update the `todo-container` every 60 seconds.
+- Deployed the application on the VM, accessible at `http://<vm-ip>:8000`.
+- Used Watchtower for auto-updates, justified for its lightweight design and ability to poll Docker Hub for new images.
+- Verified application deployment and Watchtower updates via container logs.
 
-## Features
-
-- Create, Update, and Delete Tasks: Enable users to create new tasks, update existing tasks (e.g., mark as completed, edit task details), and delete tasks they no longer need.
-- Task Categories provides Implement the ability for users to categorize their tasks into different categories (e.g., work, personal, shopping) or assign labels/tags to tasks for better organization and filtering.
-- MongoDb to store your the user data
-## Run Locally
-
-Clone the project
-
-```bash
-  git clone https://github.com/Ankit6098/Todos-nodejs
-```
-
-Go to the project directory and open index.html file
-
-```bash
-  cd Todos-nodejs
-```
-
-Install the packages
-
-```bash
-  npm install / npm i
-```
-
-Start the Server
-
-```bash
-    npm start / nodemon start
-```
-## Acknowledgements
-
- - [nodemon](https://nodemon.io/)
- - [mongoDb](https://www.mongodb.com/)
- - [mongoose](https://mongoosejs.com/)
-
-
-## Screenshots
-
-![225232515-4c100b6b-52e4-40f8-a6d4-85e30dc2f5e7](https://github.com/Ankit6098/Todos-nodejs/assets/92246613/487f548f-7ca6-4183-9443-c88c9f79c3f0)
-![225232960-da554f1f-ba4a-41f8-9856-edaebe339d76](https://github.com/Ankit6098/Todos-nodejs/assets/92246613/25515d2e-1d72-498d-8044-59a01c6b9127)
-![225238829-05433362-5b16-454c-92d5-5e536fe6912e](https://github.com/Ankit6098/Todos-nodejs/assets/92246613/316d15ca-1fe8-4581-80b1-fc316340bba6)
-![225239140-226f8eae-d8b8-4055-8a68-d85d523c2422](https://github.com/Ankit6098/Todos-nodejs/assets/92246613/44a0c418-449e-446f-8a8e-3c4e14fca8bf)
-![225239221-caf86f3d-ef17-4d18-80a6-c72123ff5444](https://github.com/Ankit6098/Todos-nodejs/assets/92246613/2ee90ab0-95d4-44f4-80ac-b17b088ac1ce)
-![225239406-98b7ba7d-df97-4d27-bb66-596a32187d87](https://github.com/Ankit6098/Todos-nodejs/assets/92246613/960ff353-1ce9-4ef8-94e4-10af09184fd2)
-![225239841-4b5d77f0-4a54-4339-b6b3-b6a1be6776b5](https://github.com/Ankit6098/Todos-nodejs/assets/92246613/f5ffc3b8-480f-4d11-9a0b-c469e3c17e8e)
-
-
-## Related
-
-Here are some other projects
-
-[Alarm CLock - javascript](https://github.com/Ankit6098/Todos-nodejs)\
-[IMDb Clone - javascript](https://github.com/Ankit6098/IMDb-Clone)
-
-
-## 🚀 About Me
-I'm a full stack developer...
-
-
-# Hi, I'm Ankit! 👋
-
-I'm a full stack developer 😎 ... Love to Develop Classic Unique fascinating and Eye Catching UI and Love to Create Projects and Building logics.
-## 🔗 Links
-[![portfolio](https://img.shields.io/badge/my_portfolio-000?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ankithub.me/Resume/)
-
-[![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColorwhite=)](https://www.linkedin.com/in/ankit-vishwakarma-6531221b0/)
-
-
-## Other Common Github Profile Sections
-🧠 I'm currently learning FullStack Developer Course from Coding Ninjas
-
-📫 How to reach me ankitvis609@gmail.com
-
-
-## 🛠 Skills
-React, Java, Javascript, HTML, CSS, Nodejs, ExpressJs, Mongodb, Mongoose...
-
-
-## Feedback
-
-If you have any feedback, please reach out to us at ankitvis609@gmail.com
+### Screenshots
+- **Application on VM**:  
+  ![Application on VM](screenshots/app-vm.png)  
+  *Description*: Todo List application running on the VM at `http://<vm-ip>:8000`.
+- **Watchtower Logs**:  
+  ![Watchtower Logs](screenshots/watchtower-logs.png)  
+  *Description*: Watchtower logs confirming image update checks.
 
